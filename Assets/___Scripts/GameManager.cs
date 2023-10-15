@@ -9,8 +9,11 @@ public class GameManager : MonoBehaviour
 {
     public GameObject gameOverPanel;
     public TextMeshProUGUI gameOverText;
+    public Button restartButton;
 
     private string playerTurn;
+    private int turnCount;
+
     public TextMeshProUGUI[] buttonList;
     private static GameManager manager;
 
@@ -29,6 +32,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         playerTurn = "X";
+        turnCount = 0;
         gameOverPanel.SetActive(false);
         SetControllerOnButtons();
     }
@@ -49,6 +53,8 @@ public class GameManager : MonoBehaviour
 
     public void EndTurn()
     {
+        turnCount++;
+
         // Row
         if (buttonList[0].text == playerTurn && buttonList[1].text == playerTurn && buttonList[2].text == playerTurn)
         {
@@ -87,24 +93,52 @@ public class GameManager : MonoBehaviour
             GameOver();
         }
 
-        //Turn Over
+        // Draw
+        if(turnCount >= 9)
+        {
+            SetGameOverText("Draw...");
+        }
+        // Turn Over
         TurnOver();
     }
 
     
     void GameOver()
     {
-        for(int i = 0;i < buttonList.Length;i++)
-        {
-            buttonList[i].GetComponentInParent<Button>().interactable = false;
-        }
-
-        gameOverText.text = playerTurn + " Wins!!";
-        gameOverPanel.SetActive(true);
+        boardInteractionManager(false);
+        SetGameOverText(playerTurn + " Wins!!");
     }
 
     void TurnOver()
     {
         playerTurn = (playerTurn == "X") ? "O" : "X";
+    }
+
+    void SetGameOverText(string text)
+    {
+        gameOverText.text = text;
+        gameOverPanel.SetActive(true);
+    }
+
+    public void RestartGame()
+    {
+        playerTurn = "X";
+        turnCount = 0;
+        gameOverPanel.SetActive(false);
+
+        boardInteractionManager(true);
+
+        for (int i = 0; i < buttonList.Length; i++)
+        {
+            buttonList[i].text = "";
+        }
+    }
+
+    void boardInteractionManager(bool set)
+    {
+        for (int i = 0; i < buttonList.Length; i++)
+        {
+            buttonList[i].GetComponentInParent<Button>().interactable = true;
+        }
     }
 }
