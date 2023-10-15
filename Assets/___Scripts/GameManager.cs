@@ -7,6 +7,9 @@ using Unity.VisualScripting;
 
 public class GameManager : MonoBehaviour
 {
+    public GameObject gameOverPanel;
+    public TextMeshProUGUI gameOverText;
+
     private string playerTurn;
     public TextMeshProUGUI[] buttonList;
     private static GameManager manager;
@@ -26,6 +29,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         playerTurn = "X";
+        gameOverPanel.SetActive(false);
         SetControllerOnButtons();
     }
 
@@ -82,6 +86,9 @@ public class GameManager : MonoBehaviour
         {
             GameOver();
         }
+
+        //Turn Over
+        TurnOver();
     }
 
     
@@ -91,5 +98,13 @@ public class GameManager : MonoBehaviour
         {
             buttonList[i].GetComponentInParent<Button>().interactable = false;
         }
+
+        gameOverText.text = playerTurn + " Wins!!";
+        gameOverPanel.SetActive(true);
+    }
+
+    void TurnOver()
+    {
+        playerTurn = (playerTurn == "X") ? "O" : "X";
     }
 }
