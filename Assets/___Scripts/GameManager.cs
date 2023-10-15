@@ -55,7 +55,6 @@ public class GameManager : MonoBehaviour
 
     public string GetPlayerTurn()
     {
-        // TODO : this will return X or O based on which player turn it is!
         return playerTurn;
     }
 
@@ -111,10 +110,9 @@ public class GameManager : MonoBehaviour
 
         if (playerTurn == "O")
         {
-            TurnAI();
+            MiniMaxAI();
         }
     }
-
 
     void GameOver()
     {
@@ -175,7 +173,7 @@ public class GameManager : MonoBehaviour
     }
 
     #region AI_MiniMax
-    void TurnAI()
+    void MiniMaxAI()
     {
         int bestMove = -1;
         int bestValue = -1000;
