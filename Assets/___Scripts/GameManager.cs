@@ -5,6 +5,21 @@ using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
 
+
+[System.Serializable]
+public class Player
+{
+    public Image panel;
+    public TextMeshProUGUI text;
+}
+
+[System.Serializable]
+public class PlayerColor
+{
+    public Color panelColor;
+    public Color textColor;
+}
+
 public class GameManager : MonoBehaviour
 {
     public GameObject gameOverPanel;
@@ -13,6 +28,11 @@ public class GameManager : MonoBehaviour
 
     private string playerTurn;
     private int turnCount;
+    public Player playerX;
+    public Player playerO;
+
+    public PlayerColor activePlayerColor;
+    public PlayerColor inactivePlayerColor;
 
     public TextMeshProUGUI[] buttonList;
     private static GameManager manager;
@@ -32,6 +52,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         playerTurn = "X";
+        SetPlayerTurnDisplay(playerX, playerO);
         turnCount = 0;
         gameOverPanel.SetActive(false);
         SetControllerOnButtons();
@@ -112,6 +133,14 @@ public class GameManager : MonoBehaviour
     void TurnOver()
     {
         playerTurn = (playerTurn == "X") ? "O" : "X";
+        if (playerTurn == "X")
+        {
+            SetPlayerTurnDisplay(playerX, playerO);
+        }
+        else
+        {
+            SetPlayerTurnDisplay(playerO, playerX);
+        }
     }
 
     void SetGameOverText(string text)
@@ -140,5 +169,14 @@ public class GameManager : MonoBehaviour
         {
             buttonList[i].GetComponentInParent<Button>().interactable = true;
         }
+    }
+
+    void SetPlayerTurnDisplay(Player newPlayer, Player oldPlayer)
+    {
+        newPlayer.panel.color = activePlayerColor.panelColor;
+        newPlayer.text.color = activePlayerColor.textColor;
+
+        oldPlayer.panel.color = inactivePlayerColor.panelColor;
+        oldPlayer.text.color = inactivePlayerColor.textColor;
     }
 }
