@@ -35,19 +35,6 @@ public class GameManager : MonoBehaviour
     public PlayerColor inactivePlayerColor;
 
     public TextMeshProUGUI[] buttonList;
-    private static GameManager manager;
-
-    public static GameManager instance
-    {
-        get
-        {
-            if (manager == null)
-            {
-                manager = new GameManager();
-            }
-            return manager;
-        }
-    }
 
     private void Awake()
     {
@@ -115,20 +102,20 @@ public class GameManager : MonoBehaviour
         }
 
         // Draw
-        if(turnCount >= 9)
+        if (turnCount >= 9)
         {
             SetGameOverText("Draw...");
         }
         // Turn Over
         TurnOver();
 
-        if(playerTurn == "O")
+        if (playerTurn == "O")
         {
             TurnAI();
         }
     }
 
-    
+
     void GameOver()
     {
         boardInteractionManager(false);
@@ -187,18 +174,164 @@ public class GameManager : MonoBehaviour
         oldPlayer.text.color = inactivePlayerColor.textColor;
     }
 
+    #region AI_MiniMax
     void TurnAI()
     {
-        bool foundEmptySpot = false;
+        int bestMove = -1;
+        int bestValue = -1000;
 
-        while(!foundEmptySpot)
+        // Traverse all cells to find the best move
+        for (int i = 0; i < 9; i++)
         {
-            int randomNumber = Random.Range(0, 9);
-            if (buttonList[randomNumber].GetComponentInParent<Button>().IsInteractable())
+            // Check if cell is empty
+            if (buttonList[i].text == "")
             {
-                buttonList[randomNumber].GetComponentInParent<Button>().onClick.Invoke();
-                foundEmptySpot = true;
+                // Make the move for AI
+                buttonList[i].text = "O";
+
+                // Compute evaluation function for this move
+                int moveValue = MiniMax(0, false);
+
+                // Undo the move
+                buttonList[i].text = "";
+
+                // If the current move is better than the best move
+                if (moveValue > bestValue)
+                {
+                    bestMove = i;
+                    bestValue = moveValue;
+                }
             }
         }
+
+        // Make the best move
+        if (bestMove != -1)
+        {
+            buttonList[bestMove].text = "O";
+            buttonList[bestMove].GetComponentInParent<Button>().interactable = false;
+            EndTurn();
+        }
     }
+
+    private int EvaluateBoard()
+    {
+        // Check rows for victory
+        for (int row = 0; row < 3; row++)
+        {
+            if (buttonList[row * 3].text == buttonList[row * 3 + 1].text && buttonList[row * 3 + 1].text == buttonList[row * 3 + 2].text)
+            {
+                if (buttonList[row * 3].text == "O")
+                    return +10;
+                else if (buttonList[row * 3].text == "X")
+                    return -10;
+            }
+        }
+
+        // Check columns for victory
+        for (int col = 0; col < 3; col++)
+        {
+            if (buttonList[col].text == buttonList[col + 3].text && buttonList[col + 3].text == buttonList[col + 6].text)
+            {
+                if (buttonList[col].text == "O")
+                    return +10;
+                else if (buttonList[col].text == "X")
+                    return -10;
+            }
+        }
+
+        // Check diagonals for victory
+        if (buttonList[0].text == buttonList[4].text && buttonList[4].text == buttonList[8].text)
+        {
+            if (buttonList[0].text == "O")
+                return +10;
+            else if (buttonList[0].text == "X")
+                return -10;
+        }
+        if (buttonList[2].text == buttonList[4].text && buttonList[4].text == buttonList[6].text)
+        {
+            if (buttonList[2].text == "O")
+                return +10;
+            else if (buttonList[2].text == "X")
+                return -10;
+        }
+
+        // No one has won
+        return 0;
+    }
+
+    private bool AreMovesLeft()
+    {
+        for (int i = 0; i < buttonList.Length; i++)
+        {
+            if (buttonList[i].text == "")
+                return true;
+        }
+        return false;
+    }
+
+    private int MiniMax(int depth, bool isMax)
+    {
+        int boardVal = EvaluateBoard();
+
+        // If AI has won the game, return his/her evaluated score
+        if (boardVal == 10)
+            return boardVal;
+
+        // If the opponent has won the game, return his/her evaluated score
+        if (boardVal == -10)
+            return boardVal;
+
+        // If there are no more moves and no winner, return 0
+        if (AreMovesLeft() == false)
+            return 0;
+
+        // If this is AI's move
+        if (isMax)
+        {
+            int best = -1000;
+
+            // Traverse all cells
+            for (int i = 0; i < 9; i++)
+            {
+                // Check if cell is empty
+                if (buttonList[i].text == "")
+                {
+                    // Make the move
+                    buttonList[i].text = "O";
+
+                    // Call MiniMax recursively and choose the maximum value
+                    best = Mathf.Max(best, MiniMax(depth + 1, !isMax));
+
+                    // Undo the move
+                    buttonList[i].text = "";
+                }
+            }
+            return best;
+        }
+
+        // If this is player's move
+        else
+        {
+            int best = 1000;
+
+            // Traverse all cells
+            for (int i = 0; i < 9; i++)
+            {
+                // Check if cell is empty
+                if (buttonList[i].text == "")
+                {
+                    // Make the move
+                    buttonList[i].text = "X";
+
+                    // Call MiniMax recursively and choose the minimum value
+                    best = Mathf.Min(best, MiniMax(depth + 1, !isMax));
+
+                    // Undo the move
+                    buttonList[i].text = "";
+                }
+            }
+            return best;
+        }
+    }
+    #endregion
 }
