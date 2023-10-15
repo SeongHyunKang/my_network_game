@@ -121,6 +121,11 @@ public class GameManager : MonoBehaviour
         }
         // Turn Over
         TurnOver();
+
+        if(playerTurn == "O")
+        {
+            TurnAI();
+        }
     }
 
     
@@ -161,6 +166,8 @@ public class GameManager : MonoBehaviour
         {
             buttonList[i].text = "";
         }
+
+        SetPlayerTurnDisplay(playerX, playerO);
     }
 
     void boardInteractionManager(bool set)
@@ -178,5 +185,20 @@ public class GameManager : MonoBehaviour
 
         oldPlayer.panel.color = inactivePlayerColor.panelColor;
         oldPlayer.text.color = inactivePlayerColor.textColor;
+    }
+
+    void TurnAI()
+    {
+        bool foundEmptySpot = false;
+
+        while(!foundEmptySpot)
+        {
+            int randomNumber = Random.Range(0, 9);
+            if (buttonList[randomNumber].GetComponentInParent<Button>().IsInteractable())
+            {
+                buttonList[randomNumber].GetComponentInParent<Button>().onClick.Invoke();
+                foundEmptySpot = true;
+            }
+        }
     }
 }
